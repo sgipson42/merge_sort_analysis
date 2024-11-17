@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void merge(const int h, const int m, const vector<int>& arr1, const vector<int>& arr2, vector<int>& arr) {
+void merge1(const int h, const int m, const vector<int>& arr1, const vector<int>& arr2, vector<int>& arr) {
 	int i = 0;
 	int j = 0;
 	int k = 0;
@@ -43,7 +43,41 @@ void mergeSort1(const int n, vector<int>& arr) {
 
 		mergeSort1(h, arr1);
 		mergeSort1(m, arr2);
-		merge(h,m, arr1, arr2, arr);
+		merge1(h,m, arr1, arr2, arr);
+	}
+}
+
+void merge2(const int low, const int mid, const int high, vector<int>& arr) {
+	vector<int> temp(high - low + 1);
+	int i = low;
+	int j = mid+1;
+	int k = low;
+
+	while (i<=mid && j<=high) {
+		if (arr[i] < arr[j]) {
+			temp[k-low] = arr[i];
+			i++;
+		} else {
+			temp[k-low] = arr[j];
+			j++;
+		}
+		k++;
+	}
+	if ( i > mid) {
+		copy(arr.begin() + j, arr.begin() + high + 1, temp.begin() + k-low);
+	} else {
+		copy(arr.begin() + i, arr.begin() + mid + 1, temp.begin() + k-low);
+	}
+	copy(temp.begin(), temp.end(), arr.begin() + low);
+}
+
+void mergeSort2(const int low, const int high, vector<int>& arr) {
+	int mid;
+	if (low < high) {
+		mid = floor((low + high)/2);
+		mergeSort2(low, mid, arr);
+		mergeSort2(mid+1, high, arr);
+		merge2(low, mid, high, arr);
 	}
 }
 
@@ -52,7 +86,7 @@ vector<int> generateData(const int size) {
 	// Set up a random number generator with a distribution for the desired range
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> dist(0, 100);
+	std::uniform_int_distribution<int> dist(0, 1000000);
 	
 	generate(result.begin(), result.end(), [&]() { return dist(gen); });
 	return result;
@@ -80,15 +114,43 @@ vector<int> preSortData(const string& sortOption, const vector<int>& arr) {
 	return copy;
 }
 
-vector<long long> loop_experiment(vector<int>& v) {
+vector<long long> loop_experiment(vector<int>& v, string& algorithm) {
 	vector<long long> times;
-	for (int i=0; i<100; i++) {
-		auto start = chrono::high_resolution_clock::now();
-		mergeSort1(v.size(), v);
-		auto end = chrono::high_resolution_clock::now();
-		auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
-		times.push_back(duration.count());
+	if (algorithm == "1") {
+		for (int i=0; i<100; i++) {
+			auto start = chrono::high_resolution_clock::now();
+			mergeSort1(v.size(), v);
+			auto end = chrono::high_resolution_clock::now();
+			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
+			times.push_back(duration.count());
+		}
+	} else if (algorithm == "2") {
+		for (int i=0; i<100; i++) {
+			auto start = chrono::high_resolution_clock::now();
+			mergeSort2(0, v.size()-1, v);
+			auto end = chrono::high_resolution_clock::now();
+			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
+			times.push_back(duration.count());
+		}
+	}/*
+	} else if (algorithm == "3") {
+		for (int i=0; i<100; i++) {
+			auto start = chrono::high_resolution_clock::now();
+			mergeSort3(v.size(), v);
+			auto end = chrono::high_resolution_clock::now();
+			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
+			times.push_back(duration.count());
+		}
+	} else if (algorithm == "4") {
+		for (int i=0; i<100; i++) {
+			auto start = chrono::high_resolution_clock::now();
+			mergeSort4(v.size(), v);
+			auto end = chrono::high_resolution_clock::now();
+			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
+			times.push_back(duration.count());
+		}
 	}
+	*/
 	return times;
 }	
 
@@ -124,12 +186,14 @@ void write_data_to_csv(const string& filename, const vector<vector<long long>>& 
 }
 
 int main(int argc, char* argv[]) {
-	//TODO: make a shell script to pass in arr size as input, so can run multiple at a time
-	//	maybe, but not the current focus
+	// TODO: pass in actual arr to mergesort1 and rerun (not by reference)
+	// 	recheck all the types in mergesort1 and merge1
 	//vector<int> sizes = {10, 100, 1000, 10000, 100000, 1000000};
 	vector<string> headers = {"unsorted_times", "reversed_times", "nearly_sorted_times", "sorted_times"};
 
 	int size = stoi(argv[1]); 	
+	string filepath = argv[2]; 	
+	string algorithm = argv[3];
 	cout << "Generating random data of size " << size << "..." << endl;
     	vector<int> v = generateData(size); 
 	printArr(v);
@@ -137,7 +201,7 @@ int main(int argc, char* argv[]) {
 	// RUN FIRST EXPERIMENT
 	cout << "running experiment on unsorted data..." << endl;
 	vector<int> randomArr = preSortData("random", v);
-	vector<long long> unsorted_times = loop_experiment(randomArr);
+	vector<long long> unsorted_times = loop_experiment(randomArr, algorithm);
 	printArr(randomArr);
 	cout << "original:\n" << endl;
 	printArr(v);
@@ -146,7 +210,7 @@ int main(int argc, char* argv[]) {
 	vector<int> reversedArr = preSortData("reverse", v);
 	printArr(reversedArr);
 	cout << "running experiment on reversed data..." << endl;
-	vector<long long> reversed_times = loop_experiment(reversedArr);
+	vector<long long> reversed_times = loop_experiment(reversedArr, algorithm);
 	printArr(reversedArr);
 	cout << "original:\n" << endl;
 	printArr(v);
@@ -155,7 +219,7 @@ int main(int argc, char* argv[]) {
 	vector<int> nearlySortedArr = preSortData("nearly", v);
 	printArr(nearlySortedArr);
 	cout << "running experiment on nearly sorted data..." << endl;
-	vector<long long> nearly_sorted_times = loop_experiment(nearlySortedArr);
+	vector<long long> nearly_sorted_times = loop_experiment(nearlySortedArr, algorithm);
 	printArr(nearlySortedArr);
 	cout << "original:\n" << endl;
 	printArr(v);
@@ -164,7 +228,7 @@ int main(int argc, char* argv[]) {
 	vector<int> sortedArr = preSortData("sort", v);
 	printArr(sortedArr);
 	cout << "running experiment on sorted data..." << endl;
-	vector<long long> sorted_times = loop_experiment(sortedArr);
+	vector<long long> sorted_times = loop_experiment(sortedArr, algorithm);
 	printArr(sortedArr);
 	cout << "original:\n" << endl;
 	printArr(v);
@@ -173,6 +237,6 @@ int main(int argc, char* argv[]) {
 	vector<vector<long long>> all_times = {unsorted_times, reversed_times, nearly_sorted_times, sorted_times};
 
 
-	write_data_to_csv("mergesort1_" + to_string(size) + ".csv", all_times, headers); 
+	write_data_to_csv(filepath + "_" + to_string(size) + ".csv", all_times, headers); 
 	// RUN NEXT EXPERIMENTS SAME SET UP
 }
