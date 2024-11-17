@@ -9,3 +9,4 @@ for algo in "${algorithms[@]}"; do
     done
 done
 
+concatenate_csvs.py

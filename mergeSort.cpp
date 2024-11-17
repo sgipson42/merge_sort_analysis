@@ -198,7 +198,7 @@ int main(int argc, char* argv[]) {
     	vector<int> v = generateData(size); 
 	printArr(v);
 
-	// RUN FIRST EXPERIMENT
+	// RUN EXPERIMENT
 	cout << "running experiment on unsorted data..." << endl;
 	vector<int> randomArr = preSortData("random", v);
 	vector<long long> unsorted_times = loop_experiment(randomArr, algorithm);
@@ -238,5 +238,4 @@ int main(int argc, char* argv[]) {
 
 
 	write_data_to_csv(filepath + "_" + to_string(size) + ".csv", all_times, headers); 
-	// RUN NEXT EXPERIMENTS SAME SET UP
 }
