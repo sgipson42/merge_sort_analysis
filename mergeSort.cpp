@@ -58,7 +58,7 @@ vector<int> generateData(const int size) {
 	return result;
 }
 
-vector<int> preSortData(const string& sortOption, const vector<int>& arr, const int& swapCount = 0) {
+vector<int> preSortData(const string& sortOption, const vector<int>& arr) {
 	vector<int> copy = arr;
 	if (sortOption == "reverse") {
 		sort(copy.begin(), copy.end(), std::greater<int>());
@@ -66,9 +66,14 @@ vector<int> preSortData(const string& sortOption, const vector<int>& arr, const 
 		sort(copy.begin(), copy.end());
 	}
 	if (sortOption == "nearly") { //sorted already
-		for (int i=0; i<swapCount; i++) {
+				      // 1/5 of data move out of order
+		cout << "swapping indices " << floor(copy.size()/5) << " times..." << endl;
+		for (int i=0; i<floor(copy.size()/5); i++) {
 			int idx1 = rand() % copy.size();
 			int idx2 = rand() % copy.size();
+			while (idx1 == idx2) {
+				idx2 = rand() % copy.size();
+			}
 			swap(copy[idx1], copy[idx2]);
 		}
 	}
@@ -81,7 +86,7 @@ vector<long long> loop_experiment(vector<int>& v) {
 		auto start = chrono::high_resolution_clock::now();
 		mergeSort1(v.size(), v);
 		auto end = chrono::high_resolution_clock::now();
-		auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+		auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
 		times.push_back(duration.count());
 	}
 	return times;
@@ -122,21 +127,9 @@ int main(int argc, char* argv[]) {
 	//TODO: make a shell script to pass in arr size as input, so can run multiple at a time
 	//	maybe, but not the current focus
 	//vector<int> sizes = {10, 100, 1000, 10000, 100000, 1000000};
-	vector<int> sampleArr = {5, 4, 3, 6, 7, 8, 1, 2, 10, 9};
-	cout << "Testing algorithms..." << endl;
-	mergeSort1(sampleArr.size(), sampleArr);
-	printArr(sampleArr);
-	//sortedArr2 = mergeSort2(sampleArr);
-	//printArr(sortedArr2);
-	//sortedArr3 = mergeSort3(sampleArr);
-	//printArr(sortedArr3);
-	//sortedArr4 = mergeSort4(sampleArr);
-	//printArr(sortedArr4);
-	
 	vector<string> headers = {"unsorted_times", "reversed_times", "nearly_sorted_times", "sorted_times"};
 
 	int size = stoi(argv[1]); 	
-	int swapCount = stoi(argv[2]);
 	cout << "Generating random data of size " << size << "..." << endl;
     	vector<int> v = generateData(size); 
 	printArr(v);
@@ -146,21 +139,36 @@ int main(int argc, char* argv[]) {
 	vector<int> randomArr = preSortData("random", v);
 	vector<long long> unsorted_times = loop_experiment(randomArr);
 	printArr(randomArr);
+	cout << "original:\n" << endl;
+	printArr(v);
 
 	cout << "reversing data..." << endl;
 	vector<int> reversedArr = preSortData("reverse", v);
+	printArr(reversedArr);
 	cout << "running experiment on reversed data..." << endl;
 	vector<long long> reversed_times = loop_experiment(reversedArr);
+	printArr(reversedArr);
+	cout << "original:\n" << endl;
+	printArr(v);
 
 	cout << "incompletely sorting data..." << endl;
-	vector<int> nearlySortedArr = preSortData("nearly", v, swapCount);
+	vector<int> nearlySortedArr = preSortData("nearly", v);
+	printArr(nearlySortedArr);
 	cout << "running experiment on nearly sorted data..." << endl;
 	vector<long long> nearly_sorted_times = loop_experiment(nearlySortedArr);
+	printArr(nearlySortedArr);
+	cout << "original:\n" << endl;
+	printArr(v);
 
 	cout << "sorting data..." << endl;
 	vector<int> sortedArr = preSortData("sort", v);
+	printArr(sortedArr);
 	cout << "running experiment on sorted data..." << endl;
 	vector<long long> sorted_times = loop_experiment(sortedArr);
+	printArr(sortedArr);
+	cout << "original:\n" << endl;
+	printArr(v);
+
 	
 	vector<vector<long long>> all_times = {unsorted_times, reversed_times, nearly_sorted_times, sorted_times};
 
