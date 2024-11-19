@@ -43,8 +43,63 @@ for alg in algs:
 console.print(mergesort_time_cols)
 console.print(mergesort_memory_cols)
 
-console.print(list(averages.index))
+mergesort_time_cols = []
+mergesort_memory_cols = []
+for alg in algs:
+	time_cols = [col for col in execution_time_cols if alg in col]
+	mergesort_time_cols.append(time_cols)
+
+	mem_cols = [col for col in memory_usage_cols if alg in col]
+	mergesort_memory_cols.append(mem_cols)
+
+console.print(mergesort_time_cols)
+console.print(mergesort_memory_cols)
+
+#console.print(list(averages.index))
 console.print(averages)
+memory_scenarios_cols = []
+for scenario in scenarios:
+	filtered_list = [item for item in averages.index if f'memory_{scenario}_usage' in item]
+	memory_scenarios_cols.append(filtered_list)		
+console.print(memory_scenarios_cols)
+
+times_scenarios_cols = []
+for scenario in scenarios:
+	filtered_list = [item for item in averages.index if f'times_{scenario}_usage' in item]
+	times_scenarios_cols.append(filtered_list)		
+
+# Generate plots for each scenario
+for scenario in scenarios:
+    plt.figure(figsize=(10, 6))
+    for alg in algs:
+        # Filter relevant data for the current algorithm and scenario
+        filtered_data = [item for item in averages.index if f'{alg}_' in item and f'memory_{scenario}_usage' in item]
+        sizes = []
+        values = []
+        
+        for col in filtered_data:
+            # Extract size from the string
+            parts = col.split('_')
+            size = int(parts[1])
+            sizes.append(size)
+            values.append(averages[col])
+        
+        # Sort by size
+        sizes, values = zip(*sorted(zip(sizes, values)))
+        plt.plot(sizes, values, marker='o', label=f"{alg}")
+
+    # Add title, labels, and legend
+    plt.title(f"Mergesort Performance on {scenario.capitalize()} Data")
+    plt.xlabel("Array Size")
+    plt.ylabel("Values")
+    plt.legend()
+    plt.grid()
+
+    # Show the graph
+    plt.show()
+    plt.savefig(f"Mergesort_Performance_on_{scenario.capitalize()}_Data.png")
+	
+"""
 for section in mergesort_memory_cols:	
 	algorithm = next((alg for alg in algs if alg in section[0]), None)
 	scenario = next((sc for sc in scenarios if sc in section[0]), None)
@@ -60,7 +115,7 @@ for section in mergesort_memory_cols:
 		sizes.append(number)
 		
 	sizes, vals = zip(*sorted(zip(sizes, vals)))
-	plt.figure(figsize=(8, 5))
+	plt.figure(figsize=(20, 5))
 	plt.scatter(sizes, vals, label="Data Points")
 	z = np.polyfit(sizes, vals, 1)
 	p = np.poly1d(z)
@@ -76,106 +131,4 @@ for section in mergesort_memory_cols:
 	plt.savefig(filename)
 	print(f"Saved figure as {filename}")
 	plt.show()
-		
-"""
-def plot_group_with_trendline(groups, series):
-    for group in groups:
-        array_sizes = []
-        values = []
-        for key in group:
-            match = re.search(r'_(\d+)_memory', key)
-            if match:
-                array_size = int(match.group(1))
-                array_sizes.append(array_size)
-                values.append(series[key])
-        # Sort data by array size
-        array_sizes, values = zip(*sorted(zip(array_sizes, values)))
-        
-        # Plot data
-        plt.figure(figsize=(8, 5))
-        plt.scatter(array_sizes, values, label="Data Points")
-        
-        # Add trend line
-        z = np.polyfit(array_sizes, values, 1)
-        p = np.poly1d(z)
-        plt.plot(array_sizes, p(array_sizes), linestyle='--', label="Trend Line")
-        
-        # Labels and title
-        plt.xlabel("Array Size")
-        plt.ylabel("Value")
-        plt.title(f"Group: {group[0].split('_memory')[0]}")
-        plt.legend()
-        plt.grid()
-        plt.show()
-
-# Plot all groups
-plot_group_with_trendline(mergesort_memory_cols, averages)
-plot_group_with_trendline(mergesort_time_cols, averages)
-		 
-"""
-	
-"""
-# separate mergesort algs into scenarios
-# Calculate averages for each column
-execution_time_averages = data[execution_time_cols].mean()
-memory_usage_averages = data[memory_usage_cols].mean()
-
-# Extract array sizes from column names (assuming sizes are consistent in naming)
-execution_time_sizes = [int(col.split('_')[1]) for col in execution_time_cols]
-memory_usage_sizes = [int(col.split('_')[1]) for col in memory_usage_cols]
-
-# Prepare data for plotting execution times
-execution_time_df = pd.DataFrame({
-    'Array Size': execution_time_sizes,
-    'Average Execution Time': execution_time_averages.values
-}).sort_values('Array Size')
-
-# Plot execution time vs. array size
-plt.figure(figsize=(10, 6))
-for col in execution_time_cols:
-    array_size = int(col.split('_')[1])
-    avg_time = data[col].mean()
-    plt.plot(array_size, avg_time, 'o', label=col.split('_')[0], alpha=0.6)
-
-# Trend line for execution time
-x = execution_time_df['Array Size']
-y = execution_time_df['Average Execution Time']
-z = np.polyfit(x, y, 2)
-p = np.poly1d(z)
-plt.plot(x, p(x), '--', label='Trend Line', color='red')
-
-# Customize the plot
-plt.title('Execution Time vs Array Size')
-plt.xlabel('Array Size')
-plt.ylabel('Average Execution Time (ms)')
-plt.legend(loc='best')
-plt.grid(True)
-plt.show()
-
-# Repeat the process for memory usage
-memory_usage_df = pd.DataFrame({
-    'Array Size': memory_usage_sizes,
-    'Average Memory Usage': memory_usage_averages.values
-}).sort_values('Array Size')
-
-plt.figure(figsize=(10, 6))
-for col in memory_usage_cols:
-    array_size = int(col.split('_')[1])
-    avg_memory = data[col].mean()
-    plt.plot(array_size, avg_memory, 'o', label=col.split('_')[0], alpha=0.6)
-
-# Trend line for memory usage
-x = memory_usage_df['Array Size']
-y = memory_usage_df['Average Memory Usage']
-z = np.polyfit(x, y, 2)
-p = np.poly1d(z)
-plt.plot(x, p(x), '--', label='Trend Line', color='red')
-
-# Customize the plot
-plt.title('Memory Usage vs Array Size')
-plt.xlabel('Array Size')
-plt.ylabel('Average Memory Usage (MB)')
-plt.legend(loc='best')
-plt.grid(True)
-plt.savefig('memory_usage_v_array_size.png')
 """
