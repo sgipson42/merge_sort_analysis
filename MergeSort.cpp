@@ -11,13 +11,29 @@
 
 using namespace std;
 
+size_t currentMemory = 0;
+size_t peakMemory = 0;
+
 struct node {
 	int key;
 	int link;
 };
 
-size_t currentMemory = 0;
-size_t peakMemory = 0;
+class ScopedMemoryTracker {
+public:
+    ScopedMemoryTracker() {
+        currentMemory = 0;
+        peakMemory = 0;
+    }
+
+    size_t getPeakMemory() const {
+        return peakMemory;
+    }
+
+    ~ScopedMemoryTracker() {
+        // Optionally log peak memory here or do nothing
+    }
+};
 
 void* operator new(size_t size) {
     currentMemory += size;
@@ -322,10 +338,9 @@ vector<size_t> space_experiment(vector<int>& v, string& algorithm) {
 	vector<int> backup = v; // ensure that the unsorted data is being used each time
 	if (algorithm == "1") {
 		for (int i=0; i<100; i++) {
-			currentMemory = 0;
-			peakMemory = 0;
+			ScopedMemoryTracker tracker;  // Start tracking memory
 			mergeSort1(v.size(), v);
-            		results.push_back(peakMemory);
+            		results.push_back(tracker.getPeakMemory());
 
 			if (i < 99) {
 				v = backup;
@@ -333,10 +348,9 @@ vector<size_t> space_experiment(vector<int>& v, string& algorithm) {
 		}
 	} else if (algorithm == "2") {
 		for (int i=0; i<100; i++) {
-			currentMemory = 0;
-			peakMemory = 0;
+			ScopedMemoryTracker tracker;  // Start tracking memory
 			mergeSort2(0, v.size()-1, v);
-            		results.push_back(peakMemory);
+            		results.push_back(tracker.getPeakMemory());
 
 			if (i < 99) {
 				v = backup;
@@ -344,10 +358,9 @@ vector<size_t> space_experiment(vector<int>& v, string& algorithm) {
 		}
 	} else if (algorithm == "3") {
 		for (int i=0; i<100; i++) {
-			currentMemory = 0;
-			peakMemory = 0;
+			ScopedMemoryTracker tracker;  // Start tracking memory
 			mergeSort3(v.size(), v);
-            		results.push_back(peakMemory);
+            		results.push_back(tracker.getPeakMemory());
 
 			if (i < 99) {
 				v = backup;
@@ -358,10 +371,9 @@ vector<size_t> space_experiment(vector<int>& v, string& algorithm) {
 		vector<node> backup = nodes;
 		for (int i=0; i<100; i++) {
 			int mergedlist;
-			currentMemory = 0;
-			peakMemory = 0;
+			ScopedMemoryTracker tracker;  // Start tracking memory
 			mergeSort4(0, v.size(), mergedlist, nodes);
-            		results.push_back(peakMemory);
+            		results.push_back(tracker.getPeakMemory());
 
 			if (i < 99) {
 				nodes = backup;
