@@ -1,0 +1,120 @@
+Script started on 2024-11-19 00:36:37-05:00 [TERM="xterm-256color" TTY="/dev/pts/14" COLUMNS="91" LINES="46"]
+[?2004h]0;smgipson@rhizome: ~/merge_sort_analysis[01;32msmgipson@rhizome[00m:[01;34m~/merge_sort_analysis[00m$ exit./mergeSort 10 mergesort4 4g++ -o mergeSort MergeSort.cpp
+[?2004l[?2004h]0;smgipson@rhizome: ~/merge_sort_analysis[01;32msmgipson@rhizome[00m:[01;34m~/merge_sort_analysis[00m$ g++ -o mergeSort MergeSort.cppexit[K./mergeSort 10 mergesort4 4
+[?2004lGenerating random data of size 10...
+5
+7
+1
+2
+2
+6
+4
+10
+1
+1
+
+running experiment on unsorted data...
+Sorted linked list:
+0 1 1 2 2 4 5 6 7 10 
+original:
+
+5
+7
+1
+2
+2
+6
+4
+10
+1
+1
+
+reversing data...
+10
+7
+6
+5
+4
+2
+2
+1
+1
+1
+
+running experiment on reversed data...
+Sorted linked list:
+0 1 1 1 2 2 4 5 6 7 
+original:
+
+5
+7
+1
+2
+2
+6
+4
+10
+1
+1
+
+incompletely sorting data...
+swapping indices 2 times...
+1
+1
+1
+5
+2
+6
+2
+4
+7
+10
+
+running experiment on nearly sorted data...
+Sorted linked list:
+0 1 1 2 2 4 5 6 7 10 
+original:
+
+5
+7
+1
+2
+2
+6
+4
+10
+1
+1
+
+sorting data...
+1
+1
+1
+2
+2
+4
+5
+6
+7
+10
+
+running experiment on sorted data...
+Sorted linked list:
+0 1 1 2 2 4 5 6 7 10 
+original:
+
+5
+7
+1
+2
+2
+6
+4
+10
+1
+1
+
+[?2004h]0;smgipson@rhizome: ~/merge_sort_analysis[01;32msmgipson@rhizome[00m:[01;34m~/merge_sort_analysis[00m$ exit
+[?2004lexit
+
+Script done on 2024-11-19 00:36:53-05:00 [COMMAND_EXIT_CODE="0"]

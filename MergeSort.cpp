@@ -10,6 +10,26 @@
 
 using namespace std;
 
+struct node {
+	int key;
+	int link;
+};
+
+vector<node> convertToNodes(const vector<int>& data) {
+    vector<node> nodes(data.size());
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        nodes[i].key = data[i];
+        if (i == data.size() - 1) {
+            nodes[i].link = 0; // End of list
+        } else {
+            nodes[i].link = i + 1; // Link to the next node
+        }
+    }
+
+    return nodes;
+}
+
 void merge1(const int h, const int m, const vector<int>& arr1, const vector<int>& arr2, vector<int>& arr) {
 	int i = 0;
 	int j = 0;
@@ -81,6 +101,87 @@ void mergeSort2(const int low, const int high, vector<int>& arr) {
 	}
 }
 
+void merge3(const int low, const int mid, const int high, vector<int>& arr) {
+	vector<int> temp(high - low + 1);
+	int i = low;
+	int j = mid+1;
+	int k = low;
+
+	while (i<=mid && j<=high) {
+		if (arr[i] < arr[j]) {
+			temp[k-low] = arr[i];
+			i++;
+		} else {
+			temp[k-low] = arr[j];
+			j++;
+		}
+		k++;
+	}
+	if ( i > mid) {
+		copy(arr.begin() + j, arr.begin() + high + 1, temp.begin() + k-low);
+	} else {
+		copy(arr.begin() + i, arr.begin() + mid + 1, temp.begin() + k-low);
+	}
+	copy(temp.begin(), temp.end(), arr.begin() + low);
+}
+
+void mergeSort3(const int n, vector<int>& arr) {
+	int m, low, mid, high, size;
+	m = pow(2, log2(n)); // this is just n
+	// m = n;
+	size = 1;
+	while (size < m) {
+		//for (low = 0; low <= m-2*size+1; low = low+2*size) {
+		for (low = 0; low + size -1 < n; low += 2*size) {
+			mid = low+size-1;
+			high = min(low+2*size-1, n-1);
+			merge3(low, mid, high, arr);
+		}
+		size = 2 * size;
+	}
+}
+
+void merge4(int list1, int list2, int& mergedlist, vector<node>& arr) {
+	int lastsorted;
+	if (arr[list1].key < arr[list2].key) {
+		mergedlist = list1;
+		list1 = arr[list1].link;
+	} else {
+		mergedlist = list2;
+		list2 = arr[list2].link;
+	}
+	lastsorted = mergedlist;
+	while (list1 != 0 && list2 != 0) {
+		if (arr[list1].key < arr[list2].key) {
+			arr[lastsorted].link = list1;
+			lastsorted = list1;
+			list1 = arr[list1].link;
+		} else {
+			arr[lastsorted].link = list2;
+			lastsorted = list2;
+			list2 = arr[list2].link;
+		}
+	}
+	if (list1 == 0){
+		arr[lastsorted].link = list2;
+	} else {
+		arr[lastsorted].link = list1;
+	}
+}
+
+void mergeSort4(const int low, const int high, int& mergedlist, vector<node>& arr) {
+	int mid, list1, list2;
+	if (low == high) {
+		mergedlist = low;
+		arr[mergedlist].link = 0;
+	} else {
+		mid = floor((low + high) / 2);
+		mergeSort4(low, mid, list1, arr);
+		mergeSort4(mid+1, high, list2, arr);
+		merge4(list1, list2, mergedlist, arr);
+	}
+}
+
 vector<int> generateData(const int size) {
 	vector<int> result(size); 
 	// Set up a random number generator with a distribution for the desired range
@@ -114,8 +215,26 @@ vector<int> preSortData(const string& sortOption, const vector<int>& arr) {
 	return copy;
 }
 
+void printArr(const vector<int>& v) {
+	for (int num : v) {
+		cout << num << endl;
+	}
+    	cout << endl;
+}
+
+void printLinkedList(int head, const vector<node>& nodes) {
+    int current = head;
+    while (current != 0) { // Traverse until the end of the list
+        cout << nodes[current].key << " ";
+        current = nodes[current].link; // Move to the next node
+    }
+    cout << endl;
+}
+
 vector<long long> loop_experiment(vector<int>& v, string& algorithm) {
+// TODO: check that its going through an unsorted one every time!!
 	vector<long long> times;
+	vector<int> backup = v; // ensure that the unsorted data is being used each time
 	if (algorithm == "1") {
 		for (int i=0; i<100; i++) {
 			auto start = chrono::high_resolution_clock::now();
@@ -123,6 +242,10 @@ vector<long long> loop_experiment(vector<int>& v, string& algorithm) {
 			auto end = chrono::high_resolution_clock::now();
 			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
 			times.push_back(duration.count());
+
+			if (i < 99) {
+				v = backup;
+			}
 		}
 	} else if (algorithm == "2") {
 		for (int i=0; i<100; i++) {
@@ -131,8 +254,11 @@ vector<long long> loop_experiment(vector<int>& v, string& algorithm) {
 			auto end = chrono::high_resolution_clock::now();
 			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
 			times.push_back(duration.count());
+
+			if (i < 99) {
+				v = backup;
+			}
 		}
-	}/*
 	} else if (algorithm == "3") {
 		for (int i=0; i<100; i++) {
 			auto start = chrono::high_resolution_clock::now();
@@ -140,26 +266,41 @@ vector<long long> loop_experiment(vector<int>& v, string& algorithm) {
 			auto end = chrono::high_resolution_clock::now();
 			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
 			times.push_back(duration.count());
+
+			if (i < 99) {
+				v = backup;
+			}
 		}
 	} else if (algorithm == "4") {
+		vector<node> nodes = convertToNodes(v);
+		vector<node> backup = nodes;
 		for (int i=0; i<100; i++) {
+			int mergedlist;
 			auto start = chrono::high_resolution_clock::now();
-			mergeSort4(v.size(), v);
+			mergeSort4(0, v.size(), mergedlist, nodes);
 			auto end = chrono::high_resolution_clock::now();
 			auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
 			times.push_back(duration.count());
+
+			if (i < 99) {
+				nodes = backup;
+			}
 		}
+	} else {
+		cout << "invalid algorithm choice." << endl;
 	}
-	*/
+	if (algorithm == "4") {
+    		int mergedlist;
+		vector<node> nodes = convertToNodes(v);
+    		mergeSort4(0, v.size(), mergedlist, nodes);
+    		cout << "Sorted linked list:" << endl;
+    		printLinkedList(mergedlist, nodes);
+	} else {
+    		printArr(v);
+	}
+
 	return times;
 }	
-
-void printArr(const vector<int>& v) {
-	for (int num : v) {
-		cout << num << endl;
-	}
-    	cout << endl;
-}
 
 void write_data_to_csv(const string& filename, const vector<vector<long long>>& lists, const vector<string>& headers) {
 	ofstream file(filename);
@@ -186,7 +327,6 @@ void write_data_to_csv(const string& filename, const vector<vector<long long>>& 
 }
 
 int main(int argc, char* argv[]) {
-	// TODO: pass in actual arr to mergesort1 and rerun (not by reference)
 	// 	recheck all the types in mergesort1 and merge1
 	//vector<int> sizes = {10, 100, 1000, 10000, 100000, 1000000};
 	vector<string> headers = {"unsorted_times", "reversed_times", "nearly_sorted_times", "sorted_times"};
@@ -202,7 +342,6 @@ int main(int argc, char* argv[]) {
 	cout << "running experiment on unsorted data..." << endl;
 	vector<int> randomArr = preSortData("random", v);
 	vector<long long> unsorted_times = loop_experiment(randomArr, algorithm);
-	printArr(randomArr);
 	cout << "original:\n" << endl;
 	printArr(v);
 
@@ -211,7 +350,6 @@ int main(int argc, char* argv[]) {
 	printArr(reversedArr);
 	cout << "running experiment on reversed data..." << endl;
 	vector<long long> reversed_times = loop_experiment(reversedArr, algorithm);
-	printArr(reversedArr);
 	cout << "original:\n" << endl;
 	printArr(v);
 
@@ -220,7 +358,6 @@ int main(int argc, char* argv[]) {
 	printArr(nearlySortedArr);
 	cout << "running experiment on nearly sorted data..." << endl;
 	vector<long long> nearly_sorted_times = loop_experiment(nearlySortedArr, algorithm);
-	printArr(nearlySortedArr);
 	cout << "original:\n" << endl;
 	printArr(v);
 
@@ -229,7 +366,6 @@ int main(int argc, char* argv[]) {
 	printArr(sortedArr);
 	cout << "running experiment on sorted data..." << endl;
 	vector<long long> sorted_times = loop_experiment(sortedArr, algorithm);
-	printArr(sortedArr);
 	cout << "original:\n" << endl;
 	printArr(v);
 
