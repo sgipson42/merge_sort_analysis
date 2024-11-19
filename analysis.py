@@ -89,15 +89,46 @@ for scenario in scenarios:
         plt.plot(sizes, values, marker='o', label=f"{alg}")
 
     # Add title, labels, and legend
-    plt.title(f"Mergesort Performance on {scenario.capitalize()} Data")
+    plt.title(f"Mergesort Memory Performance on {scenario.capitalize()} Data")
     plt.xlabel("Array Size")
-    plt.ylabel("Values")
+    plt.ylabel("Bytes")
     plt.legend()
     plt.grid()
+    plt.savefig(f"Mergesort_Memory_Performance_on_{scenario.capitalize()}_Data.png")
 
     # Show the graph
     plt.show()
-    plt.savefig(f"Mergesort_Performance_on_{scenario.capitalize()}_Data.png")
+
+for scenario in scenarios:
+    plt.figure(figsize=(10, 6))
+    for alg in algs:
+        # Filter relevant data for the current algorithm and scenario
+        filtered_data = [item for item in averages.index if f'{alg}_' in item and f'times_{scenario}' in item]
+        sizes = []
+        values = []
+        
+        for col in filtered_data:
+            # Extract size from the string
+            parts = col.split('_')
+            size = int(parts[1])
+            sizes.append(size)
+            values.append(averages[col])
+        
+        # Sort by size
+        sizes, values = zip(*sorted(zip(sizes, values)))
+        plt.plot(sizes, values, marker='o', label=f"{alg}")
+
+    # Add title, labels, and legend
+    plt.title(f"Mergesort Time Performance on {scenario.capitalize()} Data")
+    plt.xlabel("Array Size")
+    plt.ylabel("Nanoseconds")
+    plt.legend()
+    plt.grid()
+    plt.savefig(f"Mergesort_Time_Performance_on_{scenario.capitalize()}_Data.png")
+
+    # Show the graph
+    plt.show()
+	
 	
 """
 for section in mergesort_memory_cols:	
