@@ -249,7 +249,6 @@ void printLinkedList(int head, const vector<node>& nodes) {
 }
 
 vector<long long> time_experiment(vector<int>& v, string& algorithm) {
-// TODO: check that its going through an unsorted one every time!!
 	vector<long long> times;
 	vector<int> backup = v; // ensure that the unsorted data is being used each time
 	if (algorithm == "1") {
@@ -460,32 +459,32 @@ int main(int argc, char* argv[]) {
 
 	// RUN SPACE EXPERIMENT
 	cout << "running experiment on unsorted data..." << endl;
-	vector<int> randomArr = preSortData("random", v);
-	vector<size_t> unsorted_usages = space_experiment(randomArr, algorithm);
+	vector<int> randomArr2 = preSortData("random", v);
+	vector<size_t> unsorted_usages = space_experiment(randomArr2, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
 	cout << "reversing data..." << endl;
-	vector<int> reversedArr = preSortData("reverse", v);
-	printArr(reversedArr);
+	vector<int> reversedArr2 = preSortData("reverse", v);
+	printArr(reversedArr2);
 	cout << "running experiment on reversed data..." << endl;
-	vector<size_t> reversed_usages = space_experiment(reversedArr, algorithm);
+	vector<size_t> reversed_usages = space_experiment(reversedArr2, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
 	cout << "incompletely sorting data..." << endl;
-	vector<int> nearlySortedArr = preSortData("nearly", v);
-	printArr(nearlySortedArr);
+	vector<int> nearlySortedArr2 = preSortData("nearly", v);
+	printArr(nearlySortedArr2);
 	cout << "running experiment on nearly sorted data..." << endl;
-	vector<size_t> nearly_sorted_usages = space_experiment(nearlySortedArr, algorithm);
+	vector<size_t> nearly_sorted_usages = space_experiment(nearlySortedArr2, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
 	cout << "sorting data..." << endl;
-	vector<int> sortedArr = preSortData("sort", v);
-	printArr(sortedArr);
+	vector<int> sortedArr2 = preSortData("sort", v);
+	printArr(sortedArr2);
 	cout << "running experiment on sorted data..." << endl;
-	vector<size_t> sorted_usages = space_experiment(sortedArr, algorithm);
+	vector<size_t> sorted_usages = space_experiment(sortedArr2, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
