@@ -7,6 +7,7 @@
 #include <cmath>
 #include <algorithm>
 #include <random>
+#include <cstdlib>
 
 using namespace std;
 
@@ -14,6 +15,22 @@ struct node {
 	int key;
 	int link;
 };
+
+size_t currentMemory = 0;
+size_t peakMemory = 0;
+
+void* operator new(size_t size) {
+    currentMemory += size;
+    if (currentMemory > peakMemory) {
+        peakMemory = currentMemory;
+    }
+    return malloc(size);
+}
+
+void operator delete(void* ptr, size_t size) noexcept {
+    currentMemory -= size;
+    free(ptr);
+}
 
 vector<node> convertToNodes(const vector<int>& data) {
     vector<node> nodes(data.size());
@@ -231,7 +248,7 @@ void printLinkedList(int head, const vector<node>& nodes) {
     cout << endl;
 }
 
-vector<long long> loop_experiment(vector<int>& v, string& algorithm) {
+vector<long long> time_experiment(vector<int>& v, string& algorithm) {
 // TODO: check that its going through an unsorted one every time!!
 	vector<long long> times;
 	vector<int> backup = v; // ensure that the unsorted data is being used each time
@@ -301,8 +318,74 @@ vector<long long> loop_experiment(vector<int>& v, string& algorithm) {
 
 	return times;
 }	
+vector<size_t> space_experiment(vector<int>& v, string& algorithm) {
+	vector<size_t> results;
+	vector<int> backup = v; // ensure that the unsorted data is being used each time
+	if (algorithm == "1") {
+		for (int i=0; i<100; i++) {
+			currentMemory = 0;
+			peakMemory = 0;
+			mergeSort1(v.size(), v);
+            		results.push_back(peakMemory);
 
-void write_data_to_csv(const string& filename, const vector<vector<long long>>& lists, const vector<string>& headers) {
+			if (i < 99) {
+				v = backup;
+			}
+		}
+	} else if (algorithm == "2") {
+		for (int i=0; i<100; i++) {
+			currentMemory = 0;
+			peakMemory = 0;
+			mergeSort2(0, v.size()-1, v);
+            		results.push_back(peakMemory);
+
+			if (i < 99) {
+				v = backup;
+			}
+		}
+	} else if (algorithm == "3") {
+		for (int i=0; i<100; i++) {
+			currentMemory = 0;
+			peakMemory = 0;
+			mergeSort3(v.size(), v);
+            		results.push_back(peakMemory);
+
+			if (i < 99) {
+				v = backup;
+			}
+		}
+	} else if (algorithm == "4") {
+		vector<node> nodes = convertToNodes(v);
+		vector<node> backup = nodes;
+		for (int i=0; i<100; i++) {
+			int mergedlist;
+			currentMemory = 0;
+			peakMemory = 0;
+			mergeSort4(0, v.size(), mergedlist, nodes);
+            		results.push_back(peakMemory);
+
+			if (i < 99) {
+				nodes = backup;
+			}
+		}
+	} else {
+		cout << "invalid algorithm choice." << endl;
+	}
+	if (algorithm == "4") {
+    		int mergedlist;
+		vector<node> nodes = convertToNodes(v);
+    		mergeSort4(0, v.size(), mergedlist, nodes);
+    		cout << "Sorted linked list:" << endl;
+    		printLinkedList(mergedlist, nodes);
+	} else {
+    		printArr(v);
+	}
+
+	return results;
+}	
+
+template <typename T>
+void write_data_to_csv(const string& filename, const vector<vector<T>>& lists, const vector<string>& headers) {
 	ofstream file(filename);
 	
 	for (size_t i = 0; i< headers.size(); i++) {
@@ -330,6 +413,7 @@ int main(int argc, char* argv[]) {
 	// 	recheck all the types in mergesort1 and merge1
 	//vector<int> sizes = {10, 100, 1000, 10000, 100000, 1000000};
 	vector<string> headers = {"unsorted_times", "reversed_times", "nearly_sorted_times", "sorted_times"};
+	vector<string> memory_headers = {"unsorted_usage", "reversed_usage", "nearly_sorted_usage", "sorted_usage"};
 
 	int size = stoi(argv[1]); 	
 	string filepath = argv[2]; 	
@@ -338,10 +422,10 @@ int main(int argc, char* argv[]) {
     	vector<int> v = generateData(size); 
 	printArr(v);
 
-	// RUN EXPERIMENT
+	// RUN TIME EXPERIMENT
 	cout << "running experiment on unsorted data..." << endl;
 	vector<int> randomArr = preSortData("random", v);
-	vector<long long> unsorted_times = loop_experiment(randomArr, algorithm);
+	vector<long long> unsorted_times = time_experiment(randomArr, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
@@ -349,7 +433,7 @@ int main(int argc, char* argv[]) {
 	vector<int> reversedArr = preSortData("reverse", v);
 	printArr(reversedArr);
 	cout << "running experiment on reversed data..." << endl;
-	vector<long long> reversed_times = loop_experiment(reversedArr, algorithm);
+	vector<long long> reversed_times = time_experiment(reversedArr, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
@@ -357,7 +441,7 @@ int main(int argc, char* argv[]) {
 	vector<int> nearlySortedArr = preSortData("nearly", v);
 	printArr(nearlySortedArr);
 	cout << "running experiment on nearly sorted data..." << endl;
-	vector<long long> nearly_sorted_times = loop_experiment(nearlySortedArr, algorithm);
+	vector<long long> nearly_sorted_times = time_experiment(nearlySortedArr, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
@@ -365,13 +449,47 @@ int main(int argc, char* argv[]) {
 	vector<int> sortedArr = preSortData("sort", v);
 	printArr(sortedArr);
 	cout << "running experiment on sorted data..." << endl;
-	vector<long long> sorted_times = loop_experiment(sortedArr, algorithm);
+	vector<long long> sorted_times = time_experiment(sortedArr, algorithm);
 	cout << "original:\n" << endl;
 	printArr(v);
 
 	
 	vector<vector<long long>> all_times = {unsorted_times, reversed_times, nearly_sorted_times, sorted_times};
 
+	write_data_to_csv(filepath + "_" + to_string(size) + "_times.csv", all_times, headers); 
 
-	write_data_to_csv(filepath + "_" + to_string(size) + ".csv", all_times, headers); 
+	// RUN SPACE EXPERIMENT
+	cout << "running experiment on unsorted data..." << endl;
+	vector<int> randomArr = preSortData("random", v);
+	vector<size_t> unsorted_usages = space_experiment(randomArr, algorithm);
+	cout << "original:\n" << endl;
+	printArr(v);
+
+	cout << "reversing data..." << endl;
+	vector<int> reversedArr = preSortData("reverse", v);
+	printArr(reversedArr);
+	cout << "running experiment on reversed data..." << endl;
+	vector<size_t> reversed_usages = space_experiment(reversedArr, algorithm);
+	cout << "original:\n" << endl;
+	printArr(v);
+
+	cout << "incompletely sorting data..." << endl;
+	vector<int> nearlySortedArr = preSortData("nearly", v);
+	printArr(nearlySortedArr);
+	cout << "running experiment on nearly sorted data..." << endl;
+	vector<size_t> nearly_sorted_usages = space_experiment(nearlySortedArr, algorithm);
+	cout << "original:\n" << endl;
+	printArr(v);
+
+	cout << "sorting data..." << endl;
+	vector<int> sortedArr = preSortData("sort", v);
+	printArr(sortedArr);
+	cout << "running experiment on sorted data..." << endl;
+	vector<size_t> sorted_usages = space_experiment(sortedArr, algorithm);
+	cout << "original:\n" << endl;
+	printArr(v);
+
+	vector<vector<size_t>> all_usages = {unsorted_usages, reversed_usages, nearly_sorted_usages, sorted_usages};
+
+	write_data_to_csv(filepath + "_" + to_string(size) + "_memory.csv", all_usages, memory_headers); 
 }
