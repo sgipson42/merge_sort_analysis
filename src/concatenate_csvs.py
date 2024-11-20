@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-input_folder = "./" 
+input_folder = "./.." 
 output_file = "merged_columns.csv"
 all_data = []
 for filename in os.listdir(input_folder):

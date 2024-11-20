@@ -17,7 +17,7 @@ console.print(averages)
 execution_time_cols = [col for col in data.columns if '_times_' in col]
 memory_usage_cols = [col for col in data.columns if '_memory_' in col]
 
-algs = ['mergesort1', 'mergesort2', 'mergesort3', 'mergesort4']
+algs = ['/mergesort1', '/mergesort2', '/mergesort3', '/mergesort4']
 scenarios = ['unsorted', 'reversed', 'sorted', 'nearly_sorted']
 
 # separate memories and times into mergsort algs
