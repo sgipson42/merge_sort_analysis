@@ -155,7 +155,7 @@ for scenario in scenarios:
         # Sort by size
         sizes, values = zip(*sorted(zip(sizes, values)))
         #plt.plot(sizes, values, marker='o', label=f"{alg}")
-        plt.scatter(sizes, values, label="Data Points")
+        plt.scatter(sizes, values, label=f"{alg}")
         z = np.polyfit(sizes, values, 1)
         p = np.poly1d(z)
         predicted_vals = p(sizes)
@@ -190,7 +190,7 @@ for scenario in scenarios:
         # Sort by size
         sizes, values = zip(*sorted(zip(sizes, values)))
         #plt.plot(sizes, values, marker='o', label=f"{alg}")
-        plt.scatter(sizes, values, label="Data Points")
+        plt.scatter(sizes, values, label=f"{alg}")
         sizes_log = [s * np.log(s) for s in sizes]
         z = np.polyfit(sizes_log, values, 1)
         p = np.poly1d(z)
