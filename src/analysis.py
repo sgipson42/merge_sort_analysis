@@ -7,7 +7,7 @@ import numpy as np
 from rich.console import Console
 
 console = Console()
-data = pd.read_csv('merged_columns.csv')
+data = pd.read_csv('../merged_columns.csv')
 console.print(data)
 
 averages = data.mean()
@@ -17,7 +17,7 @@ console.print(averages)
 execution_time_cols = [col for col in data.columns if '_times_' in col]
 memory_usage_cols = [col for col in data.columns if '_memory_' in col]
 
-algs = ['/mergesort1', '/mergesort2', '/mergesort3', '/mergesort4']
+algs = ['mergesort1', 'mergesort2', 'mergesort3', 'mergesort4']
 scenarios = ['unsorted', 'reversed', 'sorted', 'nearly_sorted']
 
 # separate memories and times into mergsort algs
@@ -43,6 +43,7 @@ for alg in algs:
 			mergesort_memory_cols.append(scen_cols)
 console.print(mergesort_time_cols)
 console.print(mergesort_memory_cols)
+"""
 # MAKE INDIVIDUAL MEMORY GRAPHS
 for section in mergesort_memory_cols:	
 	algorithm = next((alg for alg in algs if alg in section[0]), None)
@@ -107,7 +108,7 @@ for section in mergesort_time_cols:
 	plt.savefig(filename)
 	print(f"Saved figure as {filename}")
 	plt.show()
-
+"""
 # COMBINE PER DATA SCENARIO 
 mergesort_time_cols = []
 mergesort_memory_cols = []
@@ -154,11 +155,11 @@ for scenario in scenarios:
         # Sort by size
         sizes, values = zip(*sorted(zip(sizes, values)))
         #plt.plot(sizes, values, marker='o', label=f"{alg}")
-        plt.scatter(sizes, vals, label="Data Points")
-        z = np.polyfit(sizes, vals, 1)
+        plt.scatter(sizes, values, label="Data Points")
+        z = np.polyfit(sizes, values, 1)
         p = np.poly1d(z)
-        predicted_vals = p(sizez)
-        r_squared = r2_score(vals, predicted_vals)
+        predicted_vals = p(sizes)
+        r_squared = r2_score(values, predicted_vals)
         plt.plot(sizes, predicted_vals, linestyle='--', label=f"Trend Line: y = {z[0]:.2e}x + {z[1]:.2e}\nR² = {r_squared:.4f}")
         #plt.plot(sizes, p(sizes), linestyle='--', label=f"{alg}\nTrend Line (y = {z[0]:.2e}x + {z[1]:.2e})")
 
@@ -189,13 +190,13 @@ for scenario in scenarios:
         # Sort by size
         sizes, values = zip(*sorted(zip(sizes, values)))
         #plt.plot(sizes, values, marker='o', label=f"{alg}")
-        plt.scatter(sizes, vals, label="Data Points")
+        plt.scatter(sizes, values, label="Data Points")
         sizes_log = [s * np.log(s) for s in sizes]
-        z = np.polyfit(sizes_log, vals, 1)
+        z = np.polyfit(sizes_log, values, 1)
         p = np.poly1d(z)
 
         predicted_vals = p(sizes_log)
-        r_squared = r2_score(vals, predicted_vals)
+        r_squared = r2_score(values, predicted_vals)
         plt.plot(sizes, predicted_vals, linestyle='--', label=f"Trend Line: y = {z[0]:.2e} * nlogn + {z[1]:.2e}\nR² = {r_squared:.4f}")
         #plt.plot(sizes, p(sizes), linestyle='--', label=f"{alg}\nTrend Line (y = {z[0]:.2e}x + {z[1]:.2e})")
 
